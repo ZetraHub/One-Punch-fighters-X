@@ -119,7 +119,7 @@ Tabs.InfoScript:AddParagraph({
     Content = "- YouTube ZetraScripts"
 })
 
-local YouTubeSection = Tabs.Info Script:AddSection("YouTube")
+local YouTubeSection = Tabs.InfoScript:AddSection("YouTube")
 
 local linkParaCopiar = "https://youtube.com/@zetrascripts?si=suM_heCy4O_X-P4H"
 
