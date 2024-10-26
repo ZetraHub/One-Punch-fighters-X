@@ -119,10 +119,12 @@ Tabs.InfoScript:AddParagraph({
     Content = "- YouTube ZetraScripts"
 })
 
+local YouTubeSection = Tabs.Info Script:AddSection("YouTube")
+
 local linkParaCopiar = "https://youtube.com/@zetrascripts?si=suM_heCy4O_X-P4H"
 
 Tabs.InfoScript:AddButton({
-    Title = "copy YouTube link",
+    Title = "Click to copy",
     Description = "copy the link and paste into your browser",
     Callback = function()
         setclipboard(linkParaCopiar)
@@ -142,7 +144,7 @@ end)
 Options.MyToggle:SetValue(true)
 
     Tabs.Combat:AddParagraph({
-        Title = "Auto Punch",
+        Title = "Note",
         Content = "Auto Punch May Be Errorful"
     })
 
