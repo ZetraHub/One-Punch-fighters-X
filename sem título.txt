@@ -24,9 +24,9 @@ local Window = Fluent:CreateWindow({
 
 local Tabs = {
     InfoScript = Window:AddTab({ Title = " ▎Info Script ", Icon = "scroll" }),
-    Teleports = Window:AddTab({ Title = "▎Teleports", Icon = "map" }),
     Combat = Window:AddTab({ Title = "▎Combat", Icon = "swords" }), 
     Others = Window:AddTab({ Title = "▎Others", Icon = "star" }),
+    Teleports = Window:AddTab({ Title = "▎Teleports", Icon = "map" }),
     Visuals = Window:AddTab({ Title = "▎Visuals", Icon = "eye" }),
     Player = Window:AddTab({ Title = "▎Player", Icon = "user" }),
     Settings = Window:AddTab({ Title = "▎UI Settings", Icon = "settings" }),
@@ -566,6 +566,129 @@ Tabs.Teleports:AddButton({
 
 local EspSection = Tabs.Visuals:AddSection("Esp")
 
+local Toggle = Tabs.Visuals:AddToggle("BoxToggle", {Title = "Player Box ESP", Default = false })
+
+local Players = game:GetService("Players")
+local RunService = game:GetService("RunService")
+
+local function createBox(player)
+    local box = Instance.new("BoxHandleAdornment")
+    box.Adornee = player.Character:WaitForChild("HumanoidRootPart") -- Coloca a caixa no corpo do jogador
+    box.Size = Vector3.new(4, 6, 2) -- Tamanho da caixa (ajuste conforme necessário)
+    box.Color3 = Color3.fromRGB(255, 255, 255) -- Cor da caixa (branco)
+    box.Transparency = 0.5 -- Transparência da caixa
+    box.ZIndex = 5 -- ZIndex para garantir que a caixa fique visível
+    box.AlwaysOnTop = true
+    box.Parent = player.Character.HumanoidRootPart
+
+    -- Atualiza a posição da caixa se o personagem mudar
+    player.CharacterAdded:Connect(function(newCharacter)
+        box.Adornee = newCharacter:WaitForChild("HumanoidRootPart")
+    end)
+
+    return box
+end
+
+local function updateBoxes()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            createBox(player)
+        end
+    end
+end
+
+Toggle:OnChanged(function(value)
+    if value then
+        -- Iniciar as caixas para todos os jogadores existentes
+        updateBoxes()
+
+        -- Adicionar caixas para novos jogadores que entram no jogo
+        Players.PlayerAdded:Connect(function(player)
+            player.CharacterAdded:Connect(function()
+                createBox(player)
+            end)
+        end)
+
+        print("Box ESP Enabled")
+    else
+        -- Desativar boxes (remover adornos)
+        for _, player in pairs(Players:GetPlayers()) do
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local box = player.Character.HumanoidRootPart:FindFirstChildOfClass("BoxHandleAdornment")
+                if box then
+                    box:Destroy()
+                end
+            end
+        end
+        print("Box ESP Disabled")
+    end
+end)
+
+Options.BoxToggle:SetValue(false)
+
+local Toggle = Tabs.Visuals:AddToggle("TracerToggle", {Title = "Player Tracers ESP", Default = false })
+
+local Players = game:GetService("Players")
+local Camera = workspace.CurrentCamera
+
+local function createTracer(player)
+    local tracer = Instance.new("LineHandleAdornment")
+    tracer.Adornee = player.Character.Head
+    tracer.Length = 100 -- Ajuste o comprimento do tracer
+    tracer.Color3 = Color3.fromRGB(255, 255, 255) -- Cor do tracer (branco)
+    tracer.Transparency = 0.5 -- Transparência do tracer
+    tracer.ZIndex = 5 -- ZIndex para garantir que o tracer fique visível
+    tracer.AlwaysOnTop = true
+    tracer.Parent = player.Character.Head
+
+    -- Atualiza a posição do tracer se o personagem mudar
+    player.CharacterAdded:Connect(function(newCharacter)
+        tracer.Adornee = newCharacter:WaitForChild("Head")
+    end)
+
+    return tracer
+end
+
+local function updateTracers()
+    for _, player in pairs(Players:GetPlayers()) do
+        if player.Character and player.Character:FindFirstChild("Head") then
+            local tracer = createTracer(player)
+            -- Atualiza a posição do tracer na renderização
+            game:GetService("RunService").RenderStepped:Connect(function()
+                tracer.Position = (player.Character.Head.Position - Camera.CFrame.Position).unit * 100
+            end)
+        end
+    end
+end
+
+Toggle:OnChanged(function(value)
+    if value then
+        -- Iniciar o tracer para todos os jogadores existentes
+        updateTracers()
+
+        -- Adicionar tracers para novos jogadores que entram no jogo
+        Players.PlayerAdded:Connect(function(player)
+            player.CharacterAdded:Connect(function()
+                createTracer(player)
+            end)
+        end)
+
+        print("Tracers Enabled")
+    else
+        -- Desativar tracers (remover adornos)
+        for _, player in pairs(Players:GetPlayers()) do
+            if player.Character and player.Character:FindFirstChild("Head") then
+                local tracer = player.Character.Head:FindFirstChildOfClass("LineHandleAdornment")
+                if tracer then
+                    tracer:Destroy()
+                end
+            end
+        end
+        print("Tracers Disabled")
+    end
+end)
+
+Options.TracerToggle:SetValue(false)
 
 local Toggle = Tabs.Visuals:AddToggle("MyToggle", {Title = "ESP All Players ", Default = false })
 
