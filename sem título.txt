@@ -62,8 +62,8 @@ local function getLeaderboardInfo()
 end
 
 -- Adiciona o parágrafo com as informações do Leaderboard
-Tabs.Main:AddParagraph({
-    Title = "Leaderboard Info",
+Tabs.Player:AddParagraph({
+    Title = "Stats",
     Content = getLeaderboardInfo() -- Chama a função para obter as informações
 })
 
