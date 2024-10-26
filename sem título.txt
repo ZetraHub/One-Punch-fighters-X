@@ -41,6 +41,39 @@ Fluent:Notify({
     Duration = 5
 })
 
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+
+-- Inicializa o tempo de jogo
+local playtime = 0 -- Tempo de jogo em segundos
+local playtimeUpdateInterval = 1 -- Atualiza a cada segundo
+
+-- Função para formatar o tempo de jogo em minutos e segundos
+local function formatPlaytime(seconds)
+    local minutes = math.floor(seconds / 60)
+    local secs = seconds % 60
+    return string.format("%d:%02d", minutes, secs) -- Formato MM:SS
+end
+
+-- Adiciona o parágrafo para o tempo de jogo na aba Player
+local playtimeParagraph = Tabs.Player:AddParagraph({
+    Title = "Tempo de Jogo",
+    Content = formatPlaytime(playtime) -- Exibe tempo de jogo inicial
+})
+
+-- Função para atualizar o parágrafo de tempo de jogo a cada segundo
+local function updatePlaytime()
+    while true do
+        wait(playtimeUpdateInterval)
+        playtime = playtime + playtimeUpdateInterval -- Incrementa o tempo de jogo
+        -- Atualiza o parágrafo com o tempo de jogo
+        Tabs.Player:SetParagraphContent(playtimeParagraph.Title, formatPlaytime(playtime))
+    end
+end
+
+-- Inicia a função de atualização em uma nova thread
+coroutine.wrap(updatePlaytime)()
+
 -- Obtém o jogador local
 local player = game.Players.LocalPlayer
 
