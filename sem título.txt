@@ -564,6 +564,44 @@ Tabs.Teleports:AddButton({
 
 -- Visuals
 
+local Toggle = Tabs.Visuals:AddToggle("MyToggle", {Title = "ESP All Players", Default = false })
+
+local function createESP(player)
+    local highlight = Instance.new("Highlight")
+    highlight.Parent = player.Character or player.CharacterAdded:Wait()
+    highlight.FillColor = Color3.fromRGB(255, 0, 0) -- Red color
+    highlight.OutlineColor = Color3.fromRGB(255, 255, 255) -- White outline color
+    highlight.OutlineTransparency = 0 -- Fully visible outline
+
+    -- Update highlight if the character is recreated
+    player.CharacterAdded:Connect(function(newCharacter)
+        highlight.Parent = newCharacter
+    end)
+end
+
+Toggle:OnChanged(function(value)
+    if value then
+        -- Enable ESP for all players
+        for _, player in pairs(game.Players:GetPlayers()) do
+            createESP(player)
+        end
+
+        -- Enable ESP for new players who join
+        game.Players.PlayerAdded:Connect(createESP)
+        print("ESP Enabled")
+    else
+        -- Disable ESP for all players (remove highlights)
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player.Character and player.Character:FindFirstChild("Highlight") then
+                player.Character.Highlight:Destroy()
+            end
+        end
+        print("ESP Disabled")
+    end
+end)
+
+Options.MyToggle:SetValue(false)
+
 local EspSection = Tabs.Visuals:AddSection("Esp")
 
 local showNameDistance = false
