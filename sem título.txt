@@ -73,7 +73,7 @@ player.leaderstats.ChildAdded:Connect(function()
 end)
 
 player.leaderstats.ChildRemoved:Connect(function()
-    Tabs.Main:SetParagraphContent("Leaderboard Info", getLeaderboardInfo())
+    Tabs.Player:SetParagraphContent("Leaderboard Info", getLeaderboardInfo())
 end)
 
 -- Adiciona um parágrafo na aba Player para mostrar o nome do jogador
