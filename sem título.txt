@@ -1,0 +1,594 @@
+-- Verifica se o jogo é "UPD: One Punch Fighters X"
+local placeId = game.PlaceId
+local allowedPlaceId = 18463280776 -- ID do lugar
+
+if placeId ~= allowedPlaceId then
+    return -- Não faz nada se o jogo não for o permitido
+end
+
+-- Seu código aqui
+
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
+local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
+local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
+
+local Window = Fluent:CreateWindow({
+    Title = "One Punch Fighters X  ▎By Zetra Hub",
+    SubTitle = "Latest Version",
+    TabWidth = 160,
+    Size = UDim2.fromOffset(500, 390),
+    Acrylic = true, 
+    Theme = "Dark",
+    MinimizeKey = Enum.KeyCode.LeftControl
+})
+
+local Tabs = {
+    InfoScript = Window:AddTab({ Title = " ▎Info Script ", Icon = "scroll" }),
+    Teleports = Window:AddTab({ Title = "▎Teleports", Icon = "map" }),
+    Combat = Window:AddTab({ Title = "▎Combat", Icon = "swords" }), 
+    Others = Window:AddTab({ Title = "▎Others", Icon = "star" }),
+    Visuals = Window:AddTab({ Title = "▎Visuals", Icon = "eye" }),
+    Player = Window:AddTab({ Title = "▎Player", Icon = "user" }),
+    Settings = Window:AddTab({ Title = "▎UI Settings", Icon = "settings" }),
+}
+
+local Options = Fluent.Options
+
+Fluent:Notify({
+    Title = "Notification",
+    Content = "This is a notification",
+    SubContent = "SubContent",
+    Duration = 5
+})
+
+-- Obtém o jogador local
+local player = game.Players.LocalPlayer
+
+local InfoSection = Tabs.Player:AddSection("Info")
+
+-- Adiciona um parágrafo na aba Player para mostrar o nome do jogador
+Tabs.Player:AddParagraph({
+    Title = "information",
+    Content = "Player: " .. player.Name -- Adiciona o nome do jogador
+})
+
+-- Função para atualizar o parágrafo se necessário
+local function updatePlayerName()
+    while true do
+        wait(1) -- Atualiza a cada segundo (opcional, se necessário)
+        Tabs.Player:UpdateParagraph("Player: " .. player.Name) -- Atualiza o conteúdo com o nome do jogador
+    end
+end
+
+-- Inicia a atualização do nome em uma nova thread (opcional)
+spawn(updatePlayerName) -- Não é estritamente necessário, já que o nome não muda
+
+local RunService = game:GetService("RunService")
+
+Tabs.InfoScript:AddParagraph({
+    Title = "Supported",
+    Content = "- Mobile\n- PC\n- Emulator\n- Console"
+})
+
+Tabs.InfoScript:AddParagraph({
+    Title = "Updates",
+    Content = "- 10/10/2024"
+})
+
+Tabs.InfoScript:AddParagraph({
+    Title = "Credits Script",
+    Content = "- YouTube ZetraScripts"
+})
+
+local linkParaCopiar = "https://youtube.com/@zetrascripts?si=suM_heCy4O_X-P4H"
+
+Tabs.InfoScript:AddButton({
+    Title = "copy the YouTube link",
+    Description = "copy the link and paste into your browser",
+    Callback = function()
+        setclipboard(linkParaCopiar)
+        print("Link copiado para a área de transferência.")
+    end
+})
+
+local AntiAFKEnabled = true
+
+local Toggle = Tabs.Others:AddToggle("MyToggle", {Title = "Anti AFK", Default = true})
+
+Toggle:OnChanged(function()
+    AntiAFKEnabled = Options.MyToggle.Value
+    print("Toggle changed:", AntiAFKEnabled)
+end)
+
+Options.MyToggle:SetValue(true)
+
+    Tabs.Combat:AddParagraph({
+        Title = "Auto Punch",
+        Content = "Auto Punch May Be Errorful"
+    })
+
+local virtualUser = game:GetService("VirtualUser")
+
+game:GetService("Players").LocalPlayer.Idled:Connect(function()
+    if AntiAFKEnabled then
+        virtualUser:CaptureController()
+        virtualUser:ClickButton2(Vector2.new())
+    end
+end)
+
+local attackDistance = 20
+local attackEnabled = false
+local attackSpeed = 0.01
+
+local function attackMobs()
+    while attackEnabled do
+        for _, npc in pairs(game.Workspace:GetChildren()) do
+            if npc:IsA("Model") and npc:FindFirstChild("Humanoid") and npc:FindFirstChild("HumanoidRootPart") then
+                local distance = (npc.HumanoidRootPart.Position - game.Players.LocalPlayer.Character.HumanoidRootPart.Position).Magnitude
+                if distance <= attackDistance then
+                    game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, true, game, 1)
+                    wait(attackSpeed)
+                    game:GetService("VirtualInputManager"):SendMouseButtonEvent(0, 0, 0, false, game, 1)
+                end
+            end
+        end
+        wait(0.2)
+    end
+end
+
+local AttackNPCToggle = Tabs.Combat:AddToggle("AttackNPCToggle", {
+    Title = "Auto Punch",
+    Default = false, 
+    Callback = function(value)
+        attackEnabled = value
+        if attackEnabled then
+            spawn(attackMobs)
+        end
+    end
+})
+
+local UtilitiesSection = Tabs.Combat:AddSection("Utilities")
+
+local collecting = false
+
+local Toggle = Tabs.Combat:AddToggle("AutoCollectDrops", {
+    Title = "Auto Collect All Drops",
+    Default = false
+})
+
+Toggle:OnChanged(function()
+    collecting = Options.AutoCollectDrops.Value
+    print("Auto Collect Toggle changed:", collecting)
+    
+    if collecting then
+        -- Iniciar o auto collect
+        spawn(function()
+            while collecting do
+                for _, drop in pairs(workspace.Drops:GetChildren()) do
+                    if drop:IsA("BasePart") and drop:FindFirstChild("TouchInterest") then
+                        local player = game.Players.LocalPlayer
+                        local character = player.Character or player.CharacterAdded:Wait()
+                        -- Teleporta o jogador para o drop para coletar
+                        character.HumanoidRootPart.CFrame = drop.CFrame
+                        wait(0.1) -- Aguarda um breve momento para coletar o item
+                    end
+                end
+                wait(1) -- Aguarda um segundo antes de repetir a coleta
+            end
+        end)
+    end
+end)
+
+Options.AutoCollectDrops:SetValue(false)
+
+local autoClaimRewards = false
+
+local Toggle = Tabs.Combat:AddToggle("AutoClaimTimeRewards", {
+    Title = "Auto Claim Time Rewards",
+    Default = false
+})
+
+Toggle:OnChanged(function()
+    autoClaimRewards = Options.AutoClaimTimeRewards.Value
+    print("Auto Claim Time Rewards Toggle changed:", autoClaimRewards)
+
+    if autoClaimRewards then
+        -- Iniciar o auto claim das recompensas
+        spawn(function()
+            while autoClaimRewards do
+                -- Aqui, você deve adaptar o caminho para a função ou objeto que concede a recompensa
+                local rewardButton = game:GetService("ReplicatedStorage"):FindFirstChild("TimeRewardRemoteFunction")
+                if rewardButton then
+                    -- Tenta coletar a recompensa chamando a função remota
+                    local success, result = pcall(function()
+                        return rewardButton:InvokeServer()
+                    end)
+                    if success then
+                        print("Recompensa coletada com sucesso!")
+                    else
+                        print("Falha ao coletar a recompensa:", result)
+                    end
+                else
+                    print("Recompensa não encontrada")
+                end
+                wait(60) -- Aguarda 60 segundos antes de tentar novamente
+            end
+        end)
+    end
+end)
+
+Options.AutoClaimTimeRewards:SetValue(false)
+
+local Toggle = Tabs.Combat:AddToggle("FullBrightToggle", {Title = "Full Bright", Default = false})
+
+Toggle:OnChanged(function()
+    local Lighting = game:GetService("Lighting")
+    if Toggle.Value then
+        Lighting.Brightness = 2
+        Lighting.ExposureCompensation = 0
+        Lighting.Ambient = Color3.new(1, 1, 1)
+        Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
+        print("Full Bright is ON.")
+    else
+        Lighting.Brightness = 1
+        Lighting.ExposureCompensation = 1
+        Lighting.Ambient = Color3.new(0.5, 0.5, 0.5)
+        Lighting.OutdoorAmbient = Color3.new(0.5, 0.5, 0.5)
+        print("Full Bright is OFF.")
+    end
+end)
+
+Options.FullBrightToggle:SetValue(false)
+
+-- Teleports
+
+local WorldNormalSection = Tabs.Teleports:AddSection("World Normal")
+
+Tabs.Teleports:AddParagraph({
+        Title = "Info",
+        Content = "Only use if the zones are Unlocked"
+    })
+
+-- Adiciona o dropdown para opções de teleporte
+local Dropdown = Tabs.Teleports:AddDropdown("Dropdown", {
+    Title = "Select Zone",
+    Values = {
+        "Zone 1", 
+        "Zone 2",
+        "Zone 3"
+    },
+    Multi = false,
+    Default = 1,
+})
+
+Dropdown:SetValue("Zone 1")
+
+-- Adiciona o botão para teleporte
+Tabs.Teleports:AddButton({
+    Title = "Teleport",
+    Callback = function()
+        local targetPosition
+
+        -- Obter a coordenada selecionada no dropdown
+        local selectedValue = Dropdown.Value  -- Acessa o valor diretamente
+
+        if selectedValue == "Zone 1" then
+            targetPosition = Vector3.new(-1535, 207, -251)
+        elseif selectedValue == "Zone 2" then
+            targetPosition = Vector3.new(-1532, 207, -103)
+        elseif selectedValue == "Zone 3" then
+            targetPosition = Vector3.new(-1454, 207, 114)
+        end
+
+        -- Verifica se a posição de destino foi definida
+        if targetPosition then
+            local player = game.Players.LocalPlayer
+            if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                player.Character.HumanoidRootPart.CFrame = CFrame.new(targetPosition)
+            else
+                warn("HumanoidRootPart not found")
+            end
+        else
+            warn("No target position found")
+        end
+    end
+})
+
+local Halloween Section = Tabs.Teleports:AddSection("World Halloween")
+
+Tabs.Teleports:AddButton({
+    Title = "Event",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            player.Character.HumanoidRootPart.CFrame = CFrame.new(4998, 75, -1149)
+        end
+    end
+})
+
+Tabs.Teleports:AddButton({
+    Title = "Defence",
+    Callback = function()
+        local teleportPosition = Vector3.new(-12294, 327, -7415)
+
+        local player = game.Players.LocalPlayer
+        local character = player.Character or player.CharacterAdded:Wait()
+
+        if character then
+            character:MoveTo(teleportPosition)
+        end
+    end
+})
+
+local RunService = game:GetService("RunService")
+local Players = game:GetService("Players")
+
+local WalkSpeedSection = Tabs.Player:AddSection("Walk Speed")
+
+local Players = game:GetService("Players")
+
+-- Obtém o jogador local
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+-- Define o valor padrão do WalkSpeed como 23
+local defaultWalkSpeed = 23
+
+-- Criação do Slider para ajustar o WalkSpeed na aba Player
+local Slider = Tabs.Player:AddSlider("WalkSpeedSlider", {
+    Title = "Walk Speed",
+    Default = humanoid.WalkSpeed, -- Define como o valor atual do WalkSpeed
+    Min = 0,
+    Max = 100, -- Você pode definir um valor máximo que achar adequado
+    Rounding = 1,
+    Callback = function(Value)
+        if Toggle.Value then -- Verifica se o toggle está ativado
+            humanoid.WalkSpeed = Value -- Atualiza o WalkSpeed apenas se o toggle estiver ativo
+            print("WalkSpeed set to:", Value) -- Imprime no console a nova velocidade
+        end
+    end
+})
+
+Slider:SetValue(humanoid.WalkSpeed) -- Define um valor inicial para o slider
+
+-- Criação do Toggle para ativar/desativar o WalkSpeed na aba Player
+local Toggle = Tabs.Player:AddToggle("MyToggle", {
+    Title = "Apply WalkSpeed",
+    Default = false
+})
+
+Toggle:OnChanged(function(Value)
+    if Value then
+        humanoid.WalkSpeed = Slider.Value -- Quando ativado, define o WalkSpeed como o valor do slider
+        print("Toggle activated: WalkSpeed is now", humanoid.WalkSpeed)
+    else
+        humanoid.WalkSpeed = defaultWalkSpeed -- Quando desativado, volta o WalkSpeed ao valor padrão de 23
+        print("Toggle deactivated: WalkSpeed reset to", humanoid.WalkSpeed)
+    end
+end)
+
+-- Definindo o estado inicial do Toggle
+Toggle:SetValue(false)
+
+local InfiniteJumpSection = Tabs.Player:AddSection("Infinite Jump")
+
+local Players = game:GetService("Players")
+local UserInputService = game:GetService("UserInputService")
+local RunService = game:GetService("RunService")
+
+-- Obtém o jogador local
+local player = Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+
+-- Criação do Toggle para ativar/desativar Infinite Jump e Noclip na aba Player
+local JumpNoclipToggle = Tabs.Player:AddToggle("JumpNoclipToggle", {
+    Title = "Infinite Jump & Noclip",
+    Default = false
+})
+
+-- Variável para controlar o estado do Infinite Jump
+local canJump = false
+
+-- Função para lidar com o salto
+local function onJumpRequest()
+    if JumpNoclipToggle.Value and canJump then
+        humanoid:ChangeState(Enum.HumanoidStateType.Jumping) -- Faz o personagem pular
+    end
+end
+
+-- Conectar o evento de pulo ao Humanoid
+UserInputService.JumpRequest:Connect(onJumpRequest)
+
+-- Função para atualizar o Noclip
+local function updateNoclip()
+    if JumpNoclipToggle.Value then
+        for _, part in ipairs(character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = false -- Permite que o personagem atravesse objetos
+            end
+        end
+        print("Noclip activated.")
+    else
+        for _, part in ipairs(character:GetChildren()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = true -- Restaura a colisão
+            end
+        end
+        print("Noclip deactivated.")
+    end
+end
+
+-- Conectar o evento do Toggle
+JumpNoclipToggle:OnChanged(function(Value)
+    if Value then
+        canJump = true -- Habilita o infinite jump
+        print("Infinite Jump activated.")
+    else
+        canJump = false -- Desabilita o infinite jump
+        updateNoclip() -- Atualiza o noclip ao desativar
+        print("Infinite Jump deactivated.")
+    end
+end)
+
+-- Atualiza o Noclip em tempo real enquanto o Toggle estiver ativado
+RunService.Stepped:Connect(function()
+    if JumpNoclipToggle.Value then
+        updateNoclip() -- Atualiza a colisão durante o jogo
+    end
+end)
+
+-- Definindo o estado inicial do Toggle
+JumpNoclipToggle:SetValue(false)
+
+local ExtraSection = Tabs.Player:AddSection("Extra") 
+
+-- Criação do botão que carrega o script externo
+Tabs.Player:AddButton({
+    Title = "Infinite Yield",
+    Callback = function()
+        print("Loading script...")
+        -- Carrega o script externo
+        loadstring(game:HttpGet('https://raw.githubusercontent.com/EdgeIY/infiniteyield/master/source', true))()
+    end
+})
+
+local NpcsSection = Tabs.Teleports:AddSection("NPCs")
+
+local Players = game:GetService("Players")
+local LocalPlayer = Players.LocalPlayer
+local Character = LocalPlayer.Character or LocalPlayer.CharacterAdded:Wait()
+
+-- Função para teletransportar para coordenadas específicas
+local function teleportToCoordinates(targetPosition)
+    if Character and Character:FindFirstChild("HumanoidRootPart") then
+        Character:SetPrimaryPartCFrame(CFrame.new(targetPosition))
+        print("Teleported to coordinates:", targetPosition)
+    else
+        print("Character or HumanoidRootPart not found.")
+    end
+end
+
+-- Criação do botão para teleporte na aba Teleports para a primeira coordenada
+Tabs.Teleports:AddButton({
+    Title = "Craft Key",
+    Callback = function()
+        teleportToCoordinates(Vector3.new(-1572, 207, -404))
+    end
+})
+
+-- Criação do botão para teleporte na aba Teleports para a segunda coordenada
+Tabs.Teleports:AddButton({
+    Title = "Defense",
+    Callback = function()
+        teleportToCoordinates(Vector3.new(-1591, 207, -426))
+    end
+})
+
+Tabs.Teleports:AddButton({
+    Title = "Defense Halloween",
+    Callback = function()
+        local player = game.Players.LocalPlayer
+        if player and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+            player.Character.HumanoidRootPart.CFrame = CFrame.new(5038, 75, -1056)
+        end
+    end
+})
+
+-- Criação do novo botão para teleporte na aba Teleports para a terceira coordenada
+Tabs.Teleports:AddButton({
+    Title = "Quest",
+    Callback = function()
+        teleportToCoordinates(Vector3.new(-1600, 207, -285))
+    end
+})
+
+-- Visuals
+
+local EspSection = Tabs.Visuals:AddSection("Esp")
+
+local showNameDistance = false
+
+local Toggle = Tabs.Visuals:AddToggle("ShowNameDistance", {
+    Title = "Show Name & Distance",
+    Default = false
+})
+
+Toggle:OnChanged(function()
+    showNameDistance = Options.ShowNameDistance.Value
+    print("Show Name & Distance Toggle changed:", showNameDistance)
+
+    if showNameDistance then
+        -- Iniciar a exibição do nome e distância
+        spawn(function()
+            while showNameDistance do
+                for _, player in pairs(game.Players:GetPlayers()) do
+                    if player ~= game.Players.LocalPlayer and player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                        local localPlayer = game.Players.LocalPlayer
+                        local localCharacter = localPlayer.Character
+                        local humanoidRootPart = player.Character.HumanoidRootPart
+                        local distance = (localCharacter.HumanoidRootPart.Position - humanoidRootPart.Position).Magnitude
+
+                        -- Criar BillboardGui para exibir o nome e a distância
+                        if not humanoidRootPart:FindFirstChild("NameDistanceTag") then
+                            local billboardGui = Instance.new("BillboardGui", humanoidRootPart)
+                            billboardGui.Name = "NameDistanceTag"
+                            billboardGui.Size = UDim2.new(0, 200, 0, 50)
+                            billboardGui.StudsOffset = Vector3.new(0, 3, 0)
+                            billboardGui.AlwaysOnTop = true
+
+                            local textLabel = Instance.new("TextLabel", billboardGui)
+                            textLabel.Size = UDim2.new(1, 0, 1, 0)
+                            textLabel.BackgroundTransparency = 1
+                            textLabel.TextColor3 = Color3.new(1, 1, 1)
+                            textLabel.TextStrokeTransparency = 0
+                            textLabel.TextSize = 14
+                            textLabel.Font = Enum.Font.SourceSansBold
+                        end
+
+                        -- Atualizar o texto com o nome e a distância
+                        local tag = humanoidRootPart:FindFirstChild("NameDistanceTag")
+                        if tag then
+                            tag.TextLabel.Text = player.Name .. " | " .. math.floor(distance) .. " studs"
+                        end
+                    end
+                end
+                wait(1) -- Atualiza a cada segundo
+            end
+        end)
+    else
+        -- Desativar e remover as tags de nome e distância
+        for _, player in pairs(game.Players:GetPlayers()) do
+            if player.Character and player.Character:FindFirstChild("HumanoidRootPart") then
+                local tag = player.Character.HumanoidRootPart:FindFirstChild("NameDistanceTag")
+                if tag then
+                    tag:Destroy()
+                end
+            end
+        end
+    end
+end)
+
+Options.ShowNameDistance:SetValue(false)
+
+SaveManager:SetLibrary(Fluent)
+InterfaceManager:SetLibrary(Fluent)
+
+SaveManager:IgnoreThemeSettings()
+SaveManager:SetIgnoreIndexes({})
+InterfaceManager:SetFolder("FluentScriptHub")
+SaveManager:SetFolder("FluentScriptHub/specific-game")
+
+InterfaceManager:BuildInterfaceSection(Tabs.Settings)
+SaveManager:BuildConfigSection(Tabs.Settings)
+
+Window:SelectTab(1)
+
+Fluent:Notify({
+    Title = "Fluent",
+    Content = "The script has been loaded.",
+    Duration = 8
+})
+
+SaveManager:LoadAutoloadConfig()
