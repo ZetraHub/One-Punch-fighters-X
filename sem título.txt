@@ -626,44 +626,44 @@ end)
 
 Options.BoxToggle:SetValue(false)
 
-local Toggle = Tabs.Visuals:AddToggle("TracerToggle", {Title = "Player Tracers ESP", Default = false })
-
 local Players = game:GetService("Players")
 local Camera = workspace.CurrentCamera
+local RunService = game:GetService("RunService")
+
+local Toggle = Tabs.Visuals:AddToggle("TracerToggle", {Title = "Tracer ESP", Default = false })
+
+local tracers = {} -- Tabela para armazenar os adornos dos tracers
 
 local function createTracer(player)
-    local tracer = Instance.new("LineHandleAdornment")
-    tracer.Adornee = player.Character.Head
-    tracer.Length = 100 -- Ajuste o comprimento do tracer
-    tracer.Color3 = Color3.fromRGB(255, 255, 255) -- Cor do tracer (branco)
-    tracer.Transparency = 0.5 -- Transparência do tracer
-    tracer.ZIndex = 5 -- ZIndex para garantir que o tracer fique visível
-    tracer.AlwaysOnTop = true
-    tracer.Parent = player.Character.Head
+    if player.Character and player.Character:FindFirstChild("Head") then
+        local tracer = Instance.new("LineHandleAdornment")
+        tracer.Adornee = player.Character.Head
+        tracer.Length = 100 -- Comprimento do tracer
+        tracer.Color3 = Color3.fromRGB(255, 255, 255) -- Cor do tracer (branco)
+        tracer.Transparency = 0.5 -- Transparência do tracer
+        tracer.ZIndex = 5 -- ZIndex para garantir que o tracer fique visível
+        tracer.AlwaysOnTop = true
+        tracer.Parent = player.Character.Head
+        tracers[player.UserId] = tracer -- Armazena o tracer na tabela
 
-    -- Atualiza a posição do tracer se o personagem mudar
-    player.CharacterAdded:Connect(function(newCharacter)
-        tracer.Adornee = newCharacter:WaitForChild("Head")
-    end)
-
-    return tracer
+        -- Atualiza a posição do tracer se o personagem mudar
+        player.CharacterAdded:Connect(function(newCharacter)
+            if newCharacter:FindFirstChild("Head") then
+                tracer.Adornee = newCharacter.Head
+            end
+        end)
+    end
 end
 
 local function updateTracers()
     for _, player in pairs(Players:GetPlayers()) do
-        if player.Character and player.Character:FindFirstChild("Head") then
-            local tracer = createTracer(player)
-            -- Atualiza a posição do tracer na renderização
-            game:GetService("RunService").RenderStepped:Connect(function()
-                tracer.Position = (player.Character.Head.Position - Camera.CFrame.Position).unit * 100
-            end)
-        end
+        createTracer(player) -- Cria o tracer para cada jogador
     end
 end
 
 Toggle:OnChanged(function(value)
     if value then
-        -- Iniciar o tracer para todos os jogadores existentes
+        -- Atualizar tracers existentes
         updateTracers()
 
         -- Adicionar tracers para novos jogadores que entram no jogo
@@ -673,15 +673,23 @@ Toggle:OnChanged(function(value)
             end)
         end)
 
+        -- Atualiza a posição do tracer na renderização
+        RunService.RenderStepped:Connect(function()
+            for _, player in pairs(Players:GetPlayers()) do
+                if tracers[player.UserId] and player.Character and player.Character:FindFirstChild("Head") then
+                    local tracer = tracers[player.UserId]
+                    tracer.Position = (player.Character.Head.Position - Camera.CFrame.Position).unit * 100
+                end
+            end
+        end)
+
         print("Tracers Enabled")
     else
         -- Desativar tracers (remover adornos)
         for _, player in pairs(Players:GetPlayers()) do
-            if player.Character and player.Character:FindFirstChild("Head") then
-                local tracer = player.Character.Head:FindFirstChildOfClass("LineHandleAdornment")
-                if tracer then
-                    tracer:Destroy()
-                end
+            if tracers[player.UserId] then
+                tracers[player.UserId]:Destroy()
+                tracers[player.UserId] = nil -- Remove o tracer da tabela
             end
         end
         print("Tracers Disabled")
