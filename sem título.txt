@@ -71,17 +71,20 @@ local leaderboardParagraph = Tabs.Player:AddParagraph({
 local function updateLeaderboard()
     while true do
         wait(2) -- Atualiza a cada 2 segundos
-        leaderboardParagraph.Content = getLeaderboardInfo()
+        leaderboardParagraph.Content = getLeaderboardInfo() -- Atualiza o conteúdo
+        Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, leaderboardParagraph.Content) -- Define o novo conteúdo
     end
 end
 
 -- Conecta os eventos de adição e remoção para garantir que o parágrafo sempre mostre as informações mais recentes
 player.leaderstats.ChildAdded:Connect(function()
-    leaderboardParagraph.Content = getLeaderboardInfo()
+    local newInfo = getLeaderboardInfo()
+    Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, newInfo)
 end)
 
 player.leaderstats.ChildRemoved:Connect(function()
-    leaderboardParagraph.Content = getLeaderboardInfo()
+    local newInfo = getLeaderboardInfo()
+    Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, newInfo)
 end)
 
 -- Inicia a função de atualização em uma nova thread
