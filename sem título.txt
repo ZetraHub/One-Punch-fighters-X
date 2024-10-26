@@ -180,16 +180,35 @@ Toggle:OnChanged(function()
                     local character = player.Character or player.CharacterAdded:Wait()
                     local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
 
-                    if humanoidRootPart then
-                        -- Teleportar o jogador para as coordenadas do Crab Man
-                        humanoidRootPart.CFrame = CFrame.new(coord)
+                    -- Encontrar o Crab Man na posição atual
+                    local crabMan = workspace:FindFirstChild("Crab Man")
 
-                        -- Aqui, você pode adicionar qualquer lógica para atacar o Crab Man, se necessário
-                        wait(1) -- Aguarda 1 segundo antes de tentar atacar ou prosseguir
+                    if crabMan and crabMan:FindFirstChild("Humanoid") then
+                        local humanoid = crabMan.Humanoid
+                        
+                        -- Atacar o Crab Man
+                        humanoid:TakeDamage(10) -- Ajuste o valor de dano conforme necessário
+                        wait(1) -- Aguardar um segundo para o dano ser aplicado
+
+                        -- Esperar até que o Crab Man morra
+                        while humanoid and humanoid.Health > 0 do
+                            wait(0.1) -- Aguarda até que o Crab Man morra
+                        end
+
+                        print("Crab Man derrotado. Teleportando para a próxima coordenada...")
+
+                        -- Teleportar o jogador para a próxima coordenada
+                        if humanoidRootPart then
+                            humanoidRootPart.CFrame = CFrame.new(coord)
+                        end
+
+                        wait(1) -- Aguarda 1 segundo após o teleporte antes de continuar
+                    else
+                        print("Crab Man não encontrado. Tentando novamente...")
                     end
+
+                    wait(2) -- Aguarda 2 segundos antes de tentar o próximo mob
                 end
-                
-                wait(2) -- Aguarda 2 segundos antes de reiniciar o loop
             end
         end)
     end
