@@ -150,9 +150,22 @@ local AttackNPCToggle = Tabs.Combat:AddToggle("AttackNPCToggle", {
 local autoFarmMobs = false
 
 local Toggle = Tabs.Combat:AddToggle("AutoFarmMobs", {
-    Title = "Auto Farm Vaccine Man",
+    Title = "Auto Farm Crab Man",
     Default = false
 })
+
+-- Coordenadas dos mobs
+local mobCoordinates = {
+    Vector3.new(-1571, 207, -321),
+    Vector3.new(-1553, 207, -334),
+    Vector3.new(-1530, 207, -297),
+    Vector3.new(-1568, 207, -280),
+    Vector3.new(-1543, 207, -265),
+    Vector3.new(-1508, 207, -268),
+    Vector3.new(-1485, 207, -238),
+    Vector3.new(-1529, 207, -224),
+    Vector3.new(-1559, 207, -230)
+}
 
 Toggle:OnChanged(function()
     autoFarmMobs = Options.AutoFarmMobs.Value
@@ -162,35 +175,21 @@ Toggle:OnChanged(function()
         -- Iniciar o auto farm
         spawn(function()
             while autoFarmMobs do
-                local vaccineMan = workspace:FindFirstChild("Vaccine Man")
-
-                if vaccineMan and vaccineMan:FindFirstChild("Humanoid") then
-                    local humanoid = vaccineMan.Humanoid
+                for _, coord in ipairs(mobCoordinates) do
                     local player = game.Players.LocalPlayer
                     local character = player.Character or player.CharacterAdded:Wait()
                     local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
 
-                    -- Teleportar o jogador para o Vaccine Man
-                    humanoidRootPart.CFrame = vaccineMan.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3) -- Ajuste a posição se necessário
+                    if humanoidRootPart then
+                        -- Teleportar o jogador para as coordenadas do Crab Man
+                        humanoidRootPart.CFrame = CFrame.new(coord)
 
-                    -- Atacar o Vaccine Man (se necessário, você pode adicionar a lógica de ataque aqui)
-                    humanoid:TakeDamage(10) -- Exemplo de dano; ajuste conforme necessário
-
-                    -- Esperar até que o Vaccine Man morra
-                    while humanoid and humanoid.Health > 0 do
-                        wait(0.1) -- Aguarda até que o mob morra
+                        -- Aqui, você pode adicionar qualquer lógica para atacar o Crab Man, se necessário
+                        wait(1) -- Aguarda 1 segundo antes de tentar atacar ou prosseguir
                     end
-
-                    print("Vaccine Man derrotado. Aguardando renascimento...")
-                    
-                    -- Aguardar o renascimento (ajuste o tempo conforme necessário)
-                    wait(5) -- Aguarda 5 segundos antes de procurar o Vaccine Man novamente
-
-                else
-                    print("Vaccine Man não encontrado. Tentando novamente...")
                 end
-
-                wait(2) -- Aguarda 2 segundos antes de procurar novamente
+                
+                wait(2) -- Aguarda 2 segundos antes de reiniciar o loop
             end
         end)
     end
