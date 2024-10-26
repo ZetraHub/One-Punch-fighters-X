@@ -147,75 +147,6 @@ local AttackNPCToggle = Tabs.Combat:AddToggle("AttackNPCToggle", {
     end
 })
 
-local autoFarmMobs = false
-
-local Toggle = Tabs.Combat:AddToggle("AutoFarmMobs", {
-    Title = "Auto Farm Crab Man",
-    Default = false
-})
-
--- Coordenadas dos mobs
-local mobCoordinates = {
-    Vector3.new(-1571, 207, -321),
-    Vector3.new(-1553, 207, -334),
-    Vector3.new(-1530, 207, -297),
-    Vector3.new(-1568, 207, -280),
-    Vector3.new(-1543, 207, -265),
-    Vector3.new(-1508, 207, -268),
-    Vector3.new(-1485, 207, -238),
-    Vector3.new(-1529, 207, -224),
-    Vector3.new(-1559, 207, -230)
-}
-
-Toggle:OnChanged(function()
-    autoFarmMobs = Options.AutoFarmMobs.Value
-    print("Auto Farm Mobs Toggle changed:", autoFarmMobs)
-
-    if autoFarmMobs then
-        -- Iniciar o auto farm
-        spawn(function()
-            while autoFarmMobs do
-                for _, coord in ipairs(mobCoordinates) do
-                    local player = game.Players.LocalPlayer
-                    local character = player.Character or player.CharacterAdded:Wait()
-                    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
-
-                    -- Encontrar o Crab Man na posição atual
-                    local crabMan = workspace:FindFirstChild("Crab Man")
-
-                    if crabMan and crabMan:FindFirstChild("Humanoid") then
-                        local humanoid = crabMan.Humanoid
-                        
-                        -- Atacar o Crab Man
-                        humanoid:TakeDamage(10) -- Ajuste o valor de dano conforme necessário
-                        wait(1) -- Aguardar um segundo para o dano ser aplicado
-
-                        -- Esperar até que o Crab Man morra
-                        while humanoid and humanoid.Health > 0 do
-                            wait(0.1) -- Aguarda até que o Crab Man morra
-                        end
-
-                        print("Crab Man derrotado. Teleportando para a próxima coordenada...")
-
-                        -- Teleportar o jogador para a próxima coordenada
-                        if humanoidRootPart then
-                            humanoidRootPart.CFrame = CFrame.new(coord)
-                        end
-
-                        wait(1) -- Aguarda 1 segundo após o teleporte antes de continuar
-                    else
-                        print("Crab Man não encontrado. Tentando novamente...")
-                    end
-
-                    wait(2) -- Aguarda 2 segundos antes de tentar o próximo mob
-                end
-            end
-        end)
-    end
-end)
-
-Options.AutoFarmMobs:SetValue(false)
-
 local UtilitiesSection = Tabs.Combat:AddSection("Utilities")
 
 local collecting = false
@@ -287,7 +218,7 @@ Toggle:OnChanged(function()
 end)
 
 Tabs.Combat:AddButton({
-    Title = "Redeem Code",
+    Title = "Redeem All Codes",
     Callback = function()
         -- List of codes to redeem
         local codes = {
