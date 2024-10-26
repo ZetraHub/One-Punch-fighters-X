@@ -69,7 +69,7 @@ Tabs.Player:AddParagraph({
 
 -- Para atualizar o parágrafo sempre que os valores mudarem
 player.leaderstats.ChildAdded:Connect(function()
-    Tabs.Main:SetParagraphContent("Leaderboard Info", getLeaderboardInfo())
+    Tabs.Player:SetParagraphContent("Leaderboard Info", getLeaderboardInfo())
 end)
 
 player.leaderstats.ChildRemoved:Connect(function()
