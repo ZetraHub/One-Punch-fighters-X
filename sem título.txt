@@ -8,7 +8,7 @@ end
 
 -- Seu código aqui
 
-local Fluent = loadstring(game:HttpGet("https://raw.githubusercontent.com/ZetraHub/One-Punch-fighters-X/refs/heads/main/sem%20t%C3%ADtulo.txt"))()
+local Fluent = loadstring(game:HttpGet("https://github.com/dawid-scripts/Fluent/releases/latest/download/main.lua"))()
 local SaveManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/SaveManager.lua"))()
 local InterfaceManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/dawid-scripts/Fluent/master/Addons/InterfaceManager.lua"))()
 
@@ -72,7 +72,7 @@ Tabs.InfoScript:AddParagraph({
 
 Tabs.InfoScript:AddParagraph({
     Title = "Updates",
-    Content = "- 10/10/2024"
+    Content = "- 26/10/2024"
 })
 
 Tabs.InfoScript:AddParagraph({
@@ -83,11 +83,11 @@ Tabs.InfoScript:AddParagraph({
 local linkParaCopiar = "https://youtube.com/@zetrascripts?si=suM_heCy4O_X-P4H"
 
 Tabs.InfoScript:AddButton({
-    Title = "copy the YouTube link",
+    Title = "copy YouTube link",
     Description = "copy the link and paste into your browser",
     Callback = function()
         setclipboard(linkParaCopiar)
-        print("Link copiado para a área de transferência.")
+        print("Link copied to clipboard.")
     end
 })
 
