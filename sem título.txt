@@ -44,52 +44,6 @@ Fluent:Notify({
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
--- Inicializa o tempo de jogo
-local playtime = 0 -- Tempo de jogo em segundos
-local playtimeUpdateInterval = 1 -- Atualiza a cada segundo
-
--- Função para formatar o tempo de jogo em minutos e segundos
-local function formatPlaytime(seconds)
-    local minutes = math.floor(seconds / 60)
-    local secs = seconds % 60
-    return string.format("%d:%02d", minutes, secs) -- Formato MM:SS
-end
-
--- Adiciona o parágrafo para o tempo de jogo na aba Player
-local playtimeParagraph = Tabs.Player:AddParagraph({
-    Title = "Tempo de Jogo",
-    Content = formatPlaytime(playtime) -- Exibe tempo de jogo inicial
-})
-
--- Função para atualizar o parágrafo de tempo de jogo a cada segundo
-local function updatePlaytime()
-    while true do
-        wait(playtimeUpdateInterval)
-        playtime = playtime + playtimeUpdateInterval -- Incrementa o tempo de jogo
-        -- Atualiza o parágrafo com o tempo de jogo
-        Tabs.Player:SetParagraphContent(playtimeParagraph.Title, formatPlaytime(playtime))
-    end
-end
-
--- Inicia a função de atualização em uma nova thread
-coroutine.wrap(updatePlaytime)()
-
--- Obtém o jogador local
-local player = game.Players.LocalPlayer
-
-local InfoSection = Tabs.Player:AddSection("Info")
-
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
-
--- Inicializa o contador de eliminações
-local eliminationsCount = 0
-
--- Função para incrementar o contador de eliminações
-local function incrementEliminations()
-    eliminationsCount = eliminationsCount + 1
-end
-
 -- Função para obter informações do Leaderboard
 local function getLeaderboardInfo()
     local leaderboardInfo = ""
@@ -102,10 +56,10 @@ local function getLeaderboardInfo()
     return leaderboardInfo
 end
 
--- Adiciona o parágrafo com as informações do Leaderboard e eliminações na aba Player
+-- Adiciona o parágrafo com as informações do Leaderboard na aba Player
 local leaderboardParagraph = Tabs.Player:AddParagraph({
     Title = "Status",
-    Content = getLeaderboardInfo() .. "💀 Eliminações: " .. eliminationsCount -- Adiciona símbolo de caveira
+    Content = getLeaderboardInfo() -- Apenas exibe as informações do leaderboard
 })
 
 -- Função para atualizar o parágrafo a cada poucos segundos
@@ -113,29 +67,23 @@ local function updateLeaderboard()
     while true do
         wait(2) -- Atualiza a cada 2 segundos
         local newInfo = getLeaderboardInfo()
-        Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, newInfo .. "💀 Eliminações: " .. eliminationsCount) -- Atualiza o conteúdo na aba
+        Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, newInfo) -- Atualiza o conteúdo na aba
     end
 end
 
 -- Conecta os eventos de adição e remoção para garantir que o parágrafo sempre mostre as informações mais recentes
 player:WaitForChild("leaderstats").ChildAdded:Connect(function()
     local newInfo = getLeaderboardInfo()
-    Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, newInfo .. "💀 Eliminações: " .. eliminationsCount)
+    Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, newInfo)
 end)
 
 player:WaitForChild("leaderstats").ChildRemoved:Connect(function()
     local newInfo = getLeaderboardInfo()
-    Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, newInfo .. "💀 Eliminações: " .. eliminationsCount)
+    Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, newInfo)
 end)
 
 -- Inicia a função de atualização em uma nova thread
 coroutine.wrap(updateLeaderboard)()
-
--- Simulação de eliminação (substitua isso pelo seu método de eliminação real)
-game.Workspace.EnemyRemoved:Connect(function()  -- Supondo que exista um evento quando um inimigo é eliminado
-    incrementEliminations()
-    Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, getLeaderboardInfo() .. "💀 Eliminações: " .. eliminationsCount) -- Atualiza imediatamente
-end)
 
 -- Adiciona um parágrafo na aba Player para mostrar o nome do jogador
 Tabs.Player:AddParagraph({
