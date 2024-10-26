@@ -564,7 +564,10 @@ Tabs.Teleports:AddButton({
 
 -- Visuals
 
-local Toggle = Tabs.Visuals:AddToggle("MyToggle", {Title = "ESP All Players", Default = false })
+local EspSection = Tabs.Visuals:AddSection("Esp")
+
+
+local Toggle = Tabs.Visuals:AddToggle("MyToggle", {Title = "ESP All Players ", Default = false })
 
 local function createESP(player)
     local highlight = Instance.new("Highlight")
@@ -601,8 +604,6 @@ Toggle:OnChanged(function(value)
 end)
 
 Options.MyToggle:SetValue(false)
-
-local EspSection = Tabs.Visuals:AddSection("Esp")
 
 local showNameDistance = false
 
