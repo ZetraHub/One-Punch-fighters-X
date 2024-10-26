@@ -286,48 +286,31 @@ Toggle:OnChanged(function()
     end
 end)
 
-Options.AutoClaimTimeRewards:SetValue(false)
-
-local x2Code = {
-    "JULYUPDATE_RESET",
-    "staffbattle",
-    "Sub2CaptainMaui",
-    "SUB2GAMERROBOT_RESET1",
-    "KittGaming",
-    "Sub2Fer999",
-    "Enyu_is_Pro",
-    "Magicbus",
-    "ENYU_IS_PRO",
-    "FUDD10",
-    "BIGNEWS",
-    "THEGREATACE",
-    "SUB2GAMERROBOT_EXP1",
-    "STRAWHATMAIME",
-    "SUB2OFFICIALNOOBIE",
-    "SUB2NOOBMASTER123",
-    "SUB2DAIGROCK",
-    "AXIORE",
-    "TANTAIGAMIMG",
-    "STRAWHATMAINE",
-    "JCWK",
-    "FUDD10_V2",
-    "SUB2FER999",
-    "MAGICBIS",
-    "TY_FOR_WATCHING",
-    "STARCODEHEO",
-    "N3WUPD"  -- Novo código adicionado
-}
-
 Tabs.Combat:AddButton({
-    Title = "Redeem all codes",  -- Nome do botão
+    Title = "Redeem Code",
     Callback = function()
-        function RedeemCode(value)
-            -- Verifique o nome correto do Remote Event
-            game:GetService("ReplicatedStorage").Remotes.Redeem:InvokeServer(value)
+        -- List of codes to redeem
+        local codes = {
+            "N3WUPD"
+        }
+
+        -- Function to redeem the codes
+        local function redeemCodes()
+            for _, code in ipairs(codes) do
+                local success, errorMessage = pcall(function()
+                    game:GetService("ReplicatedStorage").RedeemCode:FireServer(code)
+                end)
+
+                if success then
+                    print("Successfully redeemed code: " .. code)
+                else
+                    print("Failed to redeem code " .. code .. ": " .. errorMessage)
+                end
+            end
         end
-        for _, code in pairs(x2Code) do
-            RedeemCode(code)  -- Resgata todos os códigos
-        end
+
+        -- Call the function to redeem the codes
+        redeemCodes()
     end
 })
 
