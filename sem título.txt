@@ -322,6 +322,7 @@ Tabs.Combat:AddButton({
     Title = "Redeem all codes",  -- Nome do botão
     Callback = function()
         function RedeemCode(value)
+            -- Verifique o nome correto do Remote Event
             game:GetService("ReplicatedStorage").Remotes.Redeem:InvokeServer(value)
         end
         for _, code in pairs(x2Code) do
