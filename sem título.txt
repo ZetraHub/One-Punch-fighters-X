@@ -61,20 +61,31 @@ local function getLeaderboardInfo()
     return leaderboardInfo
 end
 
--- Adiciona o parágrafo com as informações do Leaderboard
-Tabs.Player:AddParagraph({
-    Title = "Stats",
+-- Adiciona o parágrafo com as informações do Leaderboard na aba Player
+local leaderboardParagraph = Tabs.Player:AddParagraph({
+    Title = "Leaderboard Info",
     Content = getLeaderboardInfo() -- Chama a função para obter as informações
 })
 
--- Para atualizar o parágrafo sempre que os valores mudarem
+-- Função para atualizar o parágrafo a cada poucos segundos
+local function updateLeaderboard()
+    while true do
+        wait(2) -- Atualiza a cada 2 segundos
+        leaderboardParagraph.Content = getLeaderboardInfo()
+    end
+end
+
+-- Conecta os eventos de adição e remoção para garantir que o parágrafo sempre mostre as informações mais recentes
 player.leaderstats.ChildAdded:Connect(function()
-    Tabs.Player:SetParagraphContent("Leaderboard Info", getLeaderboardInfo())
+    leaderboardParagraph.Content = getLeaderboardInfo()
 end)
 
 player.leaderstats.ChildRemoved:Connect(function()
-    Tabs.Player:SetParagraphContent("Leaderboard Info", getLeaderboardInfo())
+    leaderboardParagraph.Content = getLeaderboardInfo()
 end)
+
+-- Inicia a função de atualização em uma nova thread
+coroutine.wrap(updateLeaderboard)()
 
 -- Adiciona um parágrafo na aba Player para mostrar o nome do jogador
 Tabs.Player:AddParagraph({
