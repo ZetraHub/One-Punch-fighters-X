@@ -49,6 +49,14 @@ local InfoSection = Tabs.Player:AddSection("Info")
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 
+-- Inicializa o contador de eliminações
+local eliminationsCount = 0
+
+-- Função para incrementar o contador de eliminações
+local function incrementEliminations()
+    eliminationsCount = eliminationsCount + 1
+end
+
 -- Função para obter informações do Leaderboard
 local function getLeaderboardInfo()
     local leaderboardInfo = ""
@@ -61,10 +69,10 @@ local function getLeaderboardInfo()
     return leaderboardInfo
 end
 
--- Adiciona o parágrafo com as informações do Leaderboard na aba Player
+-- Adiciona o parágrafo com as informações do Leaderboard e eliminações na aba Player
 local leaderboardParagraph = Tabs.Player:AddParagraph({
-    Title = "Status",  -- Mudado para "Status"
-    Content = getLeaderboardInfo() -- Chama a função para obter as informações
+    Title = "Status",
+    Content = getLeaderboardInfo() .. "💀 Eliminações: " .. eliminationsCount -- Adiciona símbolo de caveira
 })
 
 -- Função para atualizar o parágrafo a cada poucos segundos
@@ -72,23 +80,29 @@ local function updateLeaderboard()
     while true do
         wait(2) -- Atualiza a cada 2 segundos
         local newInfo = getLeaderboardInfo()
-        Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, newInfo) -- Atualiza o conteúdo na aba
+        Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, newInfo .. "💀 Eliminações: " .. eliminationsCount) -- Atualiza o conteúdo na aba
     end
 end
 
 -- Conecta os eventos de adição e remoção para garantir que o parágrafo sempre mostre as informações mais recentes
 player:WaitForChild("leaderstats").ChildAdded:Connect(function()
     local newInfo = getLeaderboardInfo()
-    Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, newInfo)
+    Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, newInfo .. "💀 Eliminações: " .. eliminationsCount)
 end)
 
 player:WaitForChild("leaderstats").ChildRemoved:Connect(function()
     local newInfo = getLeaderboardInfo()
-    Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, newInfo)
+    Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, newInfo .. "💀 Eliminações: " .. eliminationsCount)
 end)
 
 -- Inicia a função de atualização em uma nova thread
 coroutine.wrap(updateLeaderboard)()
+
+-- Simulação de eliminação (substitua isso pelo seu método de eliminação real)
+game.Workspace.EnemyRemoved:Connect(function()  -- Supondo que exista um evento quando um inimigo é eliminado
+    incrementEliminations()
+    Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, getLeaderboardInfo() .. "💀 Eliminações: " .. eliminationsCount) -- Atualiza imediatamente
+end)
 
 -- Adiciona um parágrafo na aba Player para mostrar o nome do jogador
 Tabs.Player:AddParagraph({
