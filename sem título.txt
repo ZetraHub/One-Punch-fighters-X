@@ -147,6 +147,57 @@ local AttackNPCToggle = Tabs.Combat:AddToggle("AttackNPCToggle", {
     end
 })
 
+local autoFarmMobs = false
+
+local Toggle = Tabs.Combat:AddToggle("AutoFarmMobs", {
+    Title = "Auto Farm Vaccine Man",
+    Default = false
+})
+
+Toggle:OnChanged(function()
+    autoFarmMobs = Options.AutoFarmMobs.Value
+    print("Auto Farm Mobs Toggle changed:", autoFarmMobs)
+
+    if autoFarmMobs then
+        -- Iniciar o auto farm
+        spawn(function()
+            while autoFarmMobs do
+                local vaccineMan = workspace:FindFirstChild("Vaccine Man")
+
+                if vaccineMan and vaccineMan:FindFirstChild("Humanoid") then
+                    local humanoid = vaccineMan.Humanoid
+                    local player = game.Players.LocalPlayer
+                    local character = player.Character or player.CharacterAdded:Wait()
+                    local humanoidRootPart = character:FindFirstChild("HumanoidRootPart")
+
+                    -- Teleportar o jogador para o Vaccine Man
+                    humanoidRootPart.CFrame = vaccineMan.HumanoidRootPart.CFrame * CFrame.new(0, 0, 3) -- Ajuste a posição se necessário
+
+                    -- Atacar o Vaccine Man (se necessário, você pode adicionar a lógica de ataque aqui)
+                    humanoid:TakeDamage(10) -- Exemplo de dano; ajuste conforme necessário
+
+                    -- Esperar até que o Vaccine Man morra
+                    while humanoid and humanoid.Health > 0 do
+                        wait(0.1) -- Aguarda até que o mob morra
+                    end
+
+                    print("Vaccine Man derrotado. Aguardando renascimento...")
+                    
+                    -- Aguardar o renascimento (ajuste o tempo conforme necessário)
+                    wait(5) -- Aguarda 5 segundos antes de procurar o Vaccine Man novamente
+
+                else
+                    print("Vaccine Man não encontrado. Tentando novamente...")
+                end
+
+                wait(2) -- Aguarda 2 segundos antes de procurar novamente
+            end
+        end)
+    end
+end)
+
+Options.AutoFarmMobs:SetValue(false)
+
 local UtilitiesSection = Tabs.Combat:AddSection("Utilities")
 
 local collecting = false
@@ -219,26 +270,58 @@ end)
 
 Options.AutoClaimTimeRewards:SetValue(false)
 
-local Toggle = Tabs.Combat:AddToggle("FullBrightToggle", {Title = "Full Bright", Default = false})
+local autoEquipBestPet = false
+
+local Toggle = Tabs.Combat:AddToggle("AutoEquipBestPet", {
+    Title = "Auto Equip Best Pet",
+    Default = false
+})
 
 Toggle:OnChanged(function()
-    local Lighting = game:GetService("Lighting")
-    if Toggle.Value then
-        Lighting.Brightness = 2
-        Lighting.ExposureCompensation = 0
-        Lighting.Ambient = Color3.new(1, 1, 1)
-        Lighting.OutdoorAmbient = Color3.new(1, 1, 1)
-        print("Full Bright is ON.")
-    else
-        Lighting.Brightness = 1
-        Lighting.ExposureCompensation = 1
-        Lighting.Ambient = Color3.new(0.5, 0.5, 0.5)
-        Lighting.OutdoorAmbient = Color3.new(0.5, 0.5, 0.5)
-        print("Full Bright is OFF.")
+    autoEquipBestPet = Options.AutoEquipBestPet.Value
+    print("Auto Equip Best Pet Toggle changed:", autoEquipBestPet)
+
+    if autoEquipBestPet then
+        -- Iniciar o auto equip do melhor pet
+        spawn(function()
+            while autoEquipBestPet do
+                local player = game.Players.LocalPlayer
+                local bestPet = nil
+                local highestPower = 0
+
+                -- Verifica todos os pets do jogador
+                for _, pet in pairs(player.Pets:GetChildren()) do
+                    if pet:IsA("Model") and pet:FindFirstChild("Power") then
+                        local petPower = pet.Power.Value
+                        if petPower > highestPower then
+                            highestPower = petPower
+                            bestPet = pet
+                        end
+                    end
+                end
+
+                -- Equipar o melhor pet
+                if bestPet then
+                    local equipFunction = game.ReplicatedStorage:FindFirstChild("EquipPetRemoteFunction")
+                    if equipFunction then
+                        local success, result = pcall(function()
+                            return equipFunction:InvokeServer(bestPet)
+                        end)
+                        if success then
+                            print("Equipou o melhor pet:", bestPet.Name)
+                        else
+                            print("Falha ao equipar o pet:", result)
+                        end
+                    end
+                end
+
+                wait(5) -- Aguarda 5 segundos antes de tentar novamente
+            end
+        end)
     end
 end)
 
-Options.FullBrightToggle:SetValue(false)
+Options.AutoEquipBestPet:SetValue(false)
 
 -- Teleports
 
