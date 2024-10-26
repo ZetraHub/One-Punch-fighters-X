@@ -16,7 +16,7 @@ local Window = Fluent:CreateWindow({
     Title = "One Punch Fighters X  ▎By Zetra Hub",
     SubTitle = "Latest Version",
     TabWidth = 160,
-    Size = UDim2.fromOffset(500, 400),
+    Size = UDim2.fromOffset(500, 375),
     Acrylic = true, 
     Theme = "Dark",
     MinimizeKey = Enum.KeyCode.LeftControl
@@ -87,7 +87,7 @@ coroutine.wrap(updateLeaderboard)()
 
 -- Adiciona um parágrafo na aba Player para mostrar o nome do jogador
 Tabs.Player:AddParagraph({
-    Title = "information",
+    Title = "Info Player",
     Content = "Player: " .. player.Name -- Adiciona o nome do jogador
 })
 
