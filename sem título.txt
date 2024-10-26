@@ -54,7 +54,7 @@ local function getLeaderboardInfo()
     local leaderboardInfo = ""
 
     -- Itera sobre os valores no leaderboard
-    for _, stat in ipairs(player.leaderstats:GetChildren()) do
+    for _, stat in ipairs(player:WaitForChild("leaderstats"):GetChildren()) do
         leaderboardInfo = leaderboardInfo .. stat.Name .. ": " .. tostring(stat.Value) .. "\n"
     end
 
@@ -63,7 +63,7 @@ end
 
 -- Adiciona o parágrafo com as informações do Leaderboard na aba Player
 local leaderboardParagraph = Tabs.Player:AddParagraph({
-    Title = "Leaderboard Info",
+    Title = "Status",  -- Mudado para "Status"
     Content = getLeaderboardInfo() -- Chama a função para obter as informações
 })
 
@@ -71,18 +71,18 @@ local leaderboardParagraph = Tabs.Player:AddParagraph({
 local function updateLeaderboard()
     while true do
         wait(2) -- Atualiza a cada 2 segundos
-        leaderboardParagraph.Content = getLeaderboardInfo() -- Atualiza o conteúdo
-        Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, leaderboardParagraph.Content) -- Define o novo conteúdo
+        local newInfo = getLeaderboardInfo()
+        Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, newInfo) -- Atualiza o conteúdo na aba
     end
 end
 
 -- Conecta os eventos de adição e remoção para garantir que o parágrafo sempre mostre as informações mais recentes
-player.leaderstats.ChildAdded:Connect(function()
+player:WaitForChild("leaderstats").ChildAdded:Connect(function()
     local newInfo = getLeaderboardInfo()
     Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, newInfo)
 end)
 
-player.leaderstats.ChildRemoved:Connect(function()
+player:WaitForChild("leaderstats").ChildRemoved:Connect(function()
     local newInfo = getLeaderboardInfo()
     Tabs.Player:SetParagraphContent(leaderboardParagraph.Title, newInfo)
 end)
